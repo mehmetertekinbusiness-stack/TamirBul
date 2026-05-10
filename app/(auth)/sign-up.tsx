@@ -6,7 +6,7 @@ import {
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSignUp } from '@clerk/clerk-expo';
-import { supabase } from '../../supabase';
+import * as SecureStore from 'expo-secure-store';
 import { C } from '../../lib/constants';
 
 type Role = 'customer' | 'mechanic';
@@ -69,12 +69,9 @@ export default function SignUpScreen() {
       const result = await signUp.attemptEmailAddressVerification({ code: code.trim() });
 
       if (result.status === 'complete') {
-        // Supabase'e kullanıcı kaydı ekle
-        await supabase.from('users').insert({
-          clerk_id:   result.createdUserId,
-          role,
-          full_name:  fullName.trim(),
-        });
+        // Kayıt verisini sakla — Supabase insert'i _layout.tsx yapar (JWT hazır olunca)
+        await SecureStore.setItemAsync(`reg_role_${result.createdUserId}`, role);
+        await SecureStore.setItemAsync(`reg_name_${result.createdUserId}`, fullName.trim());
 
         await setActive({ session: result.createdSessionId });
         // _layout.tsx rolü okuyup ilgili panele yönlendirir

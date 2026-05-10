@@ -86,10 +86,18 @@ function AppLayout() {
     ExpoSplashScreen.hideAsync();
   }, []);
 
-  async function fetchRole(id: string): Promise<string> {
+  async function ensureUserAndGetRole(clerkId: string): Promise<string> {
     try {
-      const { data } = await supabase.from('users').select('role').eq('clerk_id', id).maybeSingle();
-      return data?.role || 'customer';
+      const { data } = await supabase.from('users').select('role').eq('clerk_id', clerkId).maybeSingle();
+      if (data) return data.role;
+
+      // Yeni kullanıcı — sign-up'tan bırakılan kayıt verisini al
+      const pendingRole = (await SecureStore.getItemAsync(`reg_role_${clerkId}`)) ?? 'customer';
+      const pendingName = (await SecureStore.getItemAsync(`reg_name_${clerkId}`)) ?? '';
+      await supabase.from('users').insert({ clerk_id: clerkId, role: pendingRole, full_name: pendingName });
+      await SecureStore.deleteItemAsync(`reg_role_${clerkId}`);
+      await SecureStore.deleteItemAsync(`reg_name_${clerkId}`);
+      return pendingRole;
     } catch {
       return 'customer';
     }
@@ -120,7 +128,7 @@ function AppLayout() {
     async function onAuthChange() {
       if (isSignedIn && clerkUserId) {
         setTokenGetter(() => getToken());
-        const role = await fetchRole(clerkUserId);
+        const role = await ensureUserAndGetRole(clerkUserId);
         if (!mounted) return;
         if (!pushRegistered.current) {
           pushRegistered.current = true;
