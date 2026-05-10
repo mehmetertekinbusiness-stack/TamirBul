@@ -1,0 +1,84 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(supabase:*)",
+      "Bash(~/.local/bin/eas:*)",
+      "Bash(python3:*)",
+      "Bash(kill:*)",
+      "Bash(lsof:*)",
+      "Bash(pkill:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "defaultMode": "bypassPermissions"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -qE '/LocalAppPlatform/apps/tamirbul/.*\\.tsx?$' && { cd ~/LocalAppPlatform/apps/tamirbul && COUNT=$(npx tsc --noEmit 2>&1 | grep -c 'error TS' || true) && [ \"$COUNT\" -gt 0 ] && printf '{\"systemMessage\": \"TypeScript: %s hata\"}' \"$COUNT\" || true; } || true",
+            "timeout": 60,
+            "statusMessage": "TypeScript kontrol ediliyor...",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '{\"systemMessage\": \"TamirBul — Sprint 0 TAMAMLANDI. Clerk JWT entegrasyonu tamamlandı (JWKS: topical-moccasin-85, Supabase third-party-auth aktif). Sprint 1 devam: Auth ekranları geliştirme.\"}'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "LAST=$(cd ~/LocalAppPlatform/apps/tamirbul && git log -1 --format='%ct' 2>/dev/null || echo 0); NOW=$(date +%s); DIFF=$(( (NOW - LAST) / 60 )); UNCOMMITTED=$(cd ~/LocalAppPlatform/apps/tamirbul && git status --porcelain 2>/dev/null | wc -l | tr -d ' '); if [ \"$DIFF\" -gt 30 ] && [ \"$UNCOMMITTED\" -gt 0 ]; then printf '{\"systemMessage\": \"CHECKPOINT UYARISI: Son commit %d dakika once. %s dosyada kaydedilmemis degisiklik var. /session-checkpoint calistir.\"}' \"$DIFF\" \"$UNCOMMITTED\"; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "TamirBul oturum sonu — sırayla yap: 1) ~/LocalAppPlatform/apps/tamirbul/DEVLOG.md dosyasını oku; bu oturumda yapılan YENİ teknik işler veya kararlar varsa ekle. 2) Bash ile: cd ~/LocalAppPlatform/apps/tamirbul && git diff --quiet && git diff --cached --quiet || (git add -u && git commit -m 'chore: oturum sonu - $(date +%Y-%m-%d)'). Sessizce tamamla.",
+            "timeout": 90,
+            "statusMessage": "TamirBul oturum kayıtları yazılıyor..."
+          }
+        ]
+      }
+    ]
+  }
+}
