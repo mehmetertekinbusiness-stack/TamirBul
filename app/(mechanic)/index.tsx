@@ -76,7 +76,7 @@ export default function MechanicDashboard() {
   const todayCount   = orders.filter(o => {
     const d = new Date(o.created_at);
     const now = new Date();
-    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth();
+    return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   }).length;
 
   return (

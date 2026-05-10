@@ -35,17 +35,20 @@ export default function WorkOrderDetail() {
 
   async function loadOrder() {
     setLoading(true);
-    const { data } = await supabase
-      .from('work_orders')
-      .select('id, status, category, description, mechanic_note, estimated_minutes, created_at, vehicles(plate, brand, model, year), work_order_updates(id, status, note, created_at)')
-      .eq('id', id)
-      .single();
-    if (data) {
-      const o = data as any;
-      setOrder({ ...o, updates: o.work_order_updates || [] });
-      setNote(o.mechanic_note || '');
+    try {
+      const { data } = await supabase
+        .from('work_orders')
+        .select('id, status, category, description, mechanic_note, estimated_minutes, created_at, vehicles(plate, brand, model, year), work_order_updates(id, status, note, created_at)')
+        .eq('id', id)
+        .single();
+      if (data) {
+        const o = data as any;
+        setOrder({ ...o, updates: o.work_order_updates || [] });
+        setNote(o.mechanic_note || '');
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function advanceStatus() {

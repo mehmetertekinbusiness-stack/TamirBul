@@ -74,11 +74,13 @@ export default function ShopScreen() {
       }).eq('id', shop.id);
 
       // Kategorileri güncelle: sil + yeniden ekle
-      await supabase.from('shop_categories').delete().eq('shop_id', shop.id);
+      const { error: delErr } = await supabase.from('shop_categories').delete().eq('shop_id', shop.id);
+      if (delErr) throw delErr;
       if (selCats.length > 0) {
-        await supabase.from('shop_categories').insert(
+        const { error: insErr } = await supabase.from('shop_categories').insert(
           selCats.map(cat => ({ shop_id: shop.id, category: cat }))
         );
+        if (insErr) throw insErr;
       }
       Alert.alert('Kaydedildi', 'Dükkan bilgileri güncellendi.');
     } catch {
