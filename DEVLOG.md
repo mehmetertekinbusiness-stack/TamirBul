@@ -15,6 +15,34 @@
 
 ---
 
+### [2026-05-10] Checkpoint 22:30 — work-order/[id].tsx Detay Ekranı
+
+**Tamamlanan:**
+- `work-order/[id].tsx` incelendi — remote'da tam implementasyon mevcuttu
+- `updated_by` eksikliği tespit edilip düzeltildi (RLS WITH CHECK zorunlu kılıyor)
+- `useAuth` eklendi, `myUserId` state ile UUID `loadOrder`'da fetch ediliyor
+
+**Sorunlar / Çözümler:**
+| # | Sorun | Çözüm | Durum |
+|---|-------|-------|-------|
+| T-03 | `work_order_updates` insert — `updated_by` null → RLS WITH CHECK false → 42501 | `useAuth` + `users` sorgusu ile UUID alındı, insert'e eklendi | ✅ |
+
+**Ekran özellikleri (work-order detay):**
+- Header: geri butonu + durum pill
+- Araç bölümü: plaka büyük font, marka/model/yıl
+- 5 adımlı durum timeline (CheckCircle ikonlar)
+- Tamirci notu: multiline, blur'da otosave
+- Güncelleme geçmişi: durum + not + saat
+- Footer aksiyon butonu: "X olarak işaretle" (son adımda kaybolur)
+
+**Bekleyen:**
+- `(customer)/index.tsx` — harita + tamirci listesi (sıradaki)
+- `(customer)/vehicles.tsx` — araç yönetimi
+- `(customer)/work-orders.tsx` — müşteri iş emri takibi
+- EAS build ile cihazda test
+
+---
+
 ### [2026-05-10] Checkpoint 22:00 — JWT Test + Auth Bug Fix + Mechanic Dashboard
 
 **Tamamlanan:**
