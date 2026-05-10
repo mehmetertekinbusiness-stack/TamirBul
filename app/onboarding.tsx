@@ -83,6 +83,7 @@ export default function OnboardingScreen() {
             owner_id: userId,
             name:     shopName.trim(),
             phone:    shopPhone.trim(),
+            district: shopDistrict.trim() || undefined,
             address:  shopAddress.trim() || undefined,
             city:     'İstanbul',
           })

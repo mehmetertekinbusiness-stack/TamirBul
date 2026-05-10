@@ -44,7 +44,7 @@ async function registerPushToken(userId: string) {
     const token = await Notifications.getExpoPushTokenAsync({
       projectId: Constants.expoConfig?.extra?.eas?.projectId,
     });
-    await supabase.from('users').update({ push_token: token.data }).eq('id', userId);
+    await supabase.from('users').update({ push_token: token.data }).eq('clerk_id', userId);
   } catch (e) {
     if (__DEV__) console.warn('Push token error:', e);
   }
