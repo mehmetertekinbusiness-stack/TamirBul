@@ -56,4 +56,12 @@ export type WorkOrderStatus = keyof typeof WORK_ORDER_STATUSES;
 // İstanbul pilot — ileride genişletilebilir
 export const ACTIVE_CITIES = ['İstanbul'] as const;
 
+// Harita: İstanbul merkez
+export const ISTANBUL_REGION = {
+  latitude:      41.0082,
+  longitude:     28.9784,
+  latitudeDelta:  0.15,
+  longitudeDelta: 0.15,
+};
+
 export const APP_VERSION = '1.0.0';
