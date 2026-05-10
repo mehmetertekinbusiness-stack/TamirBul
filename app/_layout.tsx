@@ -44,7 +44,7 @@ async function registerPushToken(userId: string) {
     const token = await Notifications.getExpoPushTokenAsync({
       projectId: Constants.expoConfig?.extra?.eas?.projectId,
     });
-    await supabase.from('users').update({ push_token: token.data }).eq('id', userId);
+    await supabase.from('users').update({ push_token: token.data }).eq('clerk_id', userId);
   } catch (e) {
     if (__DEV__) console.warn('Push token error:', e);
   }
@@ -95,11 +95,20 @@ function AppLayout() {
     }
   }
 
-  function navigate(signedIn: boolean | undefined, role: string | null) {
+  async function navigate(signedIn: boolean | undefined, role: string | null, clerkId: string | null) {
     let target: string;
-    if (!signedIn)              target = '/(auth)';
-    else if (role === 'mechanic') target = '/(mechanic)';
-    else                          target = '/(customer)';
+    if (!signedIn || !clerkId) {
+      target = '/(auth)';
+    } else {
+      const onboarded = await SecureStore.getItemAsync(`onboarded_${clerkId}`);
+      if (!onboarded) {
+        target = '/onboarding';
+      } else if (role === 'mechanic') {
+        target = '/(mechanic)';
+      } else {
+        target = '/(customer)';
+      }
+    }
     if (lastTarget.current === target) return;
     lastTarget.current = target;
     router.replace(target as any);
@@ -119,12 +128,12 @@ function AppLayout() {
         }
         setUserId(clerkUserId);
         setUserRole(role);
-        navigate(true, role);
+        await navigate(true, role, clerkUserId);
       } else {
         setTokenGetter(null);
         setUserId(null);
         setUserRole(null);
-        navigate(false, null);
+        await navigate(false, null, null);
       }
       setAuthReady(true);
     }
