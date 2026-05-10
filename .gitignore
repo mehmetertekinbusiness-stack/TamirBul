@@ -47,6 +47,5 @@ app-example
 /android
 
 # Firebase credentials
-google-services.json
 GoogleService-Info.plist
 supabase/.temp/
