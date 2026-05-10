@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { CaretLeft, Car, CheckCircle, ArrowRight } from 'phosphor-react-native';
+import { useAuth } from '@clerk/clerk-expo';
 import { supabase } from '../../../supabase';
 import { C, WORK_ORDER_STATUSES, REPAIR_CATEGORIES } from '../../../lib/constants';
 
@@ -24,10 +25,12 @@ type Order = {
 export default function WorkOrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { userId: clerkUserId } = useAuth();
   const [order,   setOrder]   = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
   const [note,    setNote]    = useState('');
+  const [myUserId, setMyUserId] = useState<string | null>(null);
 
   useEffect(() => {
     loadOrder();
@@ -36,6 +39,12 @@ export default function WorkOrderDetail() {
   async function loadOrder() {
     setLoading(true);
     try {
+      // Kendi user UUID'si — updated_by için gerekli
+      if (!myUserId && clerkUserId) {
+        const { data: me } = await supabase.from('users').select('id').eq('clerk_id', clerkUserId).maybeSingle();
+        if (me) setMyUserId(me.id);
+      }
+
       const { data } = await supabase
         .from('work_orders')
         .select('id, status, category, description, mechanic_note, estimated_minutes, created_at, vehicles(plate, brand, model, year), work_order_updates(id, status, note, created_at)')
@@ -66,8 +75,9 @@ export default function WorkOrderDetail() {
     if (!error) {
       await supabase.from('work_order_updates').insert({
         work_order_id: order.id,
-        status: next,
-        note: note || null,
+        status:        next,
+        note:          note || null,
+        updated_by:    myUserId,   // RLS WITH CHECK için zorunlu
       });
       setOrder(prev => prev ? { ...prev, status: next } : prev);
       await loadOrder();
