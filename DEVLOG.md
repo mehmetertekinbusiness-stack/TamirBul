@@ -15,6 +15,33 @@
 
 ---
 
+### [2026-05-10] Checkpoint 22:00 — JWT Test + Auth Bug Fix + Mechanic Dashboard
+
+**Tamamlanan:**
+- Supabase Clerk JWT entegrasyonu doğrulandı: `resolved_jwks` aktif, RS256 key yüklü
+- RLS policy'ler incelendi — tüm tablolar `current_setting('request.jwt.claims')::jsonb ->> 'sub'` kullanıyor
+- Mechanic paneli remote'da hazır: dashboard (index), iş emirleri listesi, dükkan, tedarikçi, work-order detay
+- `(mechanic)/_layout.tsx`: phosphor-react-native ikonlar (Wrench, ClipboardText, Storefront, AddressBook)
+
+**Kararlar:**
+- MCP Supabase bağlantısı Neva projesine bağlı — TamirBul için Management API kullanımına devam
+- `users_self_read` RLS: filtre olmadan `.select('id')` sadece kendi satırını döndürüyor — tüm ekranlarda bu pattern kullanılıyor
+
+**Sorunlar / Çözümler:**
+| # | Sorun | Çözüm | Durum |
+|---|-------|-------|-------|
+| T-01 | sign-up.tsx'te `setActive()` öncesi Supabase insert — JWT yok → RLS 42501 sessiz hata | insert kaldırıldı; role/name `reg_role_` / `reg_name_` SecureStore key'lerine yazılıyor; `ensureUserAndGetRole` token hazır olunca insert yapıyor | ✅ |
+| T-02 | Git object corruption — 9 boş obje, HEAD bozuk | boş objeler silindi, remote fetch, `reset --hard FETCH_HEAD` | ✅ |
+
+**Bekleyen (Sprint 1):**
+- `work-order/[id].tsx` detay ekranı — durum güncelleme + not ekleme
+- `(customer)/index.tsx` — harita + tamirci listesi
+- `(customer)/vehicles.tsx` — araç yönetimi
+- `(customer)/work-orders.tsx` — müşteri iş emri takibi
+- EAS build ile cihazda test
+
+---
+
 ### [2026-05-09] Sprint 0 Tamamlandı — Altyapı Kurulumu
 
 **Yapılanlar:**
