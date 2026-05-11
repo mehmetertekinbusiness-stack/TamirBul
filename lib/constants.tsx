@@ -12,19 +12,22 @@ export const BANNER_ID = __DEV__
   ? 'ca-app-pub-3940256099942544/6300978111'
   : 'ca-app-pub-PLACEHOLDER/PLACEHOLDER';
 
-// ─── Tasarım Renkleri ─────────────────────────────────────────────────────────
+// ─── Tasarım Renkleri (constants/theme.ts → Colors kaynağı) ──────────────────
+// Ekranlar C.primary gibi kısa alias kullanıyor — kaynak tek, Colors.
+import { Colors } from '../constants/theme';
+
 export const C = {
-  primary:    '#E8540A',   // Turuncu — ana renk
-  secondary:  '#1A3A5C',   // Lacivert — vurgu
-  bg:         '#F5F5F0',   // Kırık Beyaz — arka plan
-  surface:    '#FFFFFF',
-  border:     '#E5E7EB',
-  text:       '#111111',
-  muted:      '#6B7280',
-  success:    '#10B981',   successBg: '#D1FAE5',
-  warn:       '#F59E0B',   warnBg:    '#FEF3C7',
-  danger:     '#EF4444',   dangerBg:  '#FEE2E2',
-};
+  primary:    Colors.primary,
+  secondary:  Colors.secondary,
+  bg:         Colors.background,
+  surface:    Colors.white,
+  border:     Colors.border,
+  text:       Colors.textPrimary,
+  muted:      Colors.textSecondary,
+  success:    Colors.success,    successBg: '#D1FAE5',
+  warn:       Colors.warning,    warnBg:    '#FEF3C7',
+  danger:     Colors.error,      dangerBg:  '#FEE2E2',
+} as const;
 
 /**
  * TamirBul sabit değerleri

@@ -15,6 +15,43 @@
 
 ---
 
+### [2026-05-11] Yeni Cihaz Kurulumu + Skill Audit Oturumu
+
+**Tamamlanan:**
+- Yeni cihaza GitHub PAT ile klonlama: `neva`, `neva-dashboard`, `neva-legal`, `nevaapp-landing` (4 repo, veri kaybı yok)
+- `neva` + `neva-dashboard` → `npm install` tamamlandı
+- Claude Code global skill kurulumu: `superpowers`, `frontend-design`, `code-review`, `security-guidance` (resmi marketplace), `claude-mem` (thedotmack), `gstack` (garrytan — bun + playwright kuruldu)
+- **ts-fix:** TypeScript 3 hata → 0 hata
+  - `hooks/use-theme-color.ts`: Expo şablon `Colors.light/dark` yapısı → TamirBul flat Colors yapısına uyarlandı
+  - `components/themed-text.tsx`: `'text'` → `'textPrimary'` (Colors'da `text` anahtarı yoktu)
+- **Renk sistemi birleşimi:** `lib/constants.tsx` içindeki `C` objesi artık `constants/theme.ts → Colors`'dan türetiliyor; iki ayrı renk kaynağı → tek kaynak
+- **Güvenlik düzeltmeleri** → `supabase/migrations/20260511_004_security_fixes.sql`:
+  - `wou_mechanic_insert` RLS: sadece `updated_by` → iş emrinin tamircinin dükkanına ait olduğu doğrulaması eklendi
+  - `shop_categories` ALL policy → `INSERT` + `DELETE` olarak ayrıldı (explicit op ayrımı)
+  - `suppliers` ALL policy → `SELECT` + `INSERT` + `UPDATE` + `DELETE` olarak ayrıldı
+- `.env.example` oluşturuldu (5 env değişkeni belgelendi)
+
+**Sorunlar / Çözümler:**
+| # | Sorun | Çözüm | Durum |
+|---|-------|-------|-------|
+| T-04 | `use-theme-color.ts`: `Colors.light` mevcut değil, Expo şablonu kalıntısı | `FlatColorKey` + `DarkColorKey` type alias + dark mode koşullu lookup | ✅ AŞILDI |
+| T-05 | `themed-text.tsx`: `'text'` key Colors'da yok → TS hatası | `'textPrimary'` olarak güncellendi | ✅ AŞILDI |
+| T-06 | Çift renk sistemi: `C` (constants.tsx) + `Colors` (theme.ts) senkronizasyon riski | `C` artık `Colors`'dan türetiliyor — tek kaynak | ✅ AŞILDI |
+| T-07 | `wou_mechanic_insert` RLS: herhangi bir tamirci başka dükkanın iş emrine güncelleme ekleyebilir | Policy'e `work_order_id IN (shop'a ait work_orders)` koşulu eklendi | ✅ AŞILDI |
+
+**Health Skoru (2026-05-11):**
+- TypeScript: 0/0 hata ✅
+- ESLint: yapılandırma dosyası yok (eslint.config.js eksik) — Sprint 1 backlog
+- Test coverage: %0 — backlog
+- `.env.example`: oluşturuldu ✅
+
+**Bekleyen / Backlog:**
+- ESLint config (`eslint.config.js`) oluşturulacak
+- `20260511_004_security_fixes.sql` migration uygulanacak (`/migration-apply`)
+- Test altyapısı (Jest + React Native Testing Library) kurulacak
+
+---
+
 ### [2026-05-10] Checkpoint 22:30 — work-order/[id].tsx Detay Ekranı
 
 **Tamamlanan:**
