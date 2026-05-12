@@ -1,12 +1,12 @@
 import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet,
-  Modal, ScrollView, RefreshControl, ActivityIndicator, Linking, Image,
+  View, Text, FlatList, TouchableOpacity, StyleSheet, Alert,
+  Modal, ScrollView, RefreshControl, ActivityIndicator, Linking, Image, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useCallback } from 'react';
 import {
   ClipboardText, Car, Storefront, Clock,
-  CheckCircle, X, Phone, ArrowRight,
+  CheckCircle, X, Phone, ArrowRight, Star,
 } from 'phosphor-react-native';
 import { useAuth } from '@clerk/clerk-expo';
 import { supabase } from '../../supabase';
@@ -21,10 +21,12 @@ type Update = {
 type WorkOrder = {
   id: string; status: WorkOrderStatus; category: string;
   description: string | null; mechanic_note: string | null;
+  shop_id: string;
   created_at: string; updated_at: string;
   repair_shops: { name: string; phone: string | null } | null;
   vehicles:     { plate: string; brand: string; model: string } | null;
   work_order_updates: Update[];
+  reviews: { id: string }[];
 };
 
 const STATUS_FLOW: WorkOrderStatus[] = ['received', 'inspecting', 'in_progress', 'ready', 'delivered'];
@@ -101,15 +103,17 @@ export default function WorkOrdersScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter,     setFilter]     = useState<'active' | 'all'>('active');
   const [selected,   setSelected]   = useState<WorkOrder | null>(null);
+  const [myUserId,   setMyUserId]   = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!clerkUserId) return;
     const { data: me } = await supabase.from('users').select('id').eq('clerk_id', clerkUserId).maybeSingle();
     if (!me) return;
+    setMyUserId(me.id);
 
     const { data } = await supabase
       .from('work_orders')
-      .select('id, status, category, description, mechanic_note, created_at, updated_at, repair_shops(name,phone), vehicles(plate,brand,model), work_order_updates(id,status,note,photo_url,created_at)')
+      .select('id, status, category, description, mechanic_note, shop_id, created_at, updated_at, repair_shops(name,phone), vehicles(plate,brand,model), work_order_updates(id,status,note,photo_url,created_at), reviews(id)')
       .eq('customer_id', me.id)
       .order('created_at', { ascending: false });
 
@@ -214,7 +218,18 @@ export default function WorkOrdersScreen() {
       <Modal visible={!!selected} animationType="slide" transparent statusBarTranslucent>
         <View style={d.overlay}>
           <View style={d.sheet}>
-            {selected && <DetailSheet order={selected} onClose={() => setSelected(null)} />}
+            {selected && (
+              <DetailSheet
+                order={selected}
+                myUserId={myUserId}
+                onClose={() => setSelected(null)}
+                onReviewSubmitted={(orderId) =>
+                  setOrders(prev => prev.map(o =>
+                    o.id === orderId ? { ...o, reviews: [{ id: 'submitted' }] } : o
+                  ))
+                }
+              />
+            )}
           </View>
         </View>
       </Modal>
@@ -223,12 +238,39 @@ export default function WorkOrdersScreen() {
 }
 
 // ─── Detay Sheet ──────────────────────────────────────────────────────────────
-function DetailSheet({ order, onClose }: { order: WorkOrder; onClose: () => void }) {
+function DetailSheet({ order, myUserId, onClose, onReviewSubmitted }: {
+  order: WorkOrder; myUserId: string | null;
+  onClose: () => void; onReviewSubmitted: (_orderId: string) => void;
+}) {
   const info = WORK_ORDER_STATUSES[order.status];
   const cat  = REPAIR_CATEGORIES.find(r => r.id === order.category);
   const sortedUpdates = [...order.work_order_updates].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
+
+  const [rating,      setRating]      = useState(5);
+  const [comment,     setComment]     = useState('');
+  const [submitting,  setSubmitting]  = useState(false);
+  const [submitted,   setSubmitted]   = useState(order.reviews.length > 0);
+
+  async function submitReview() {
+    if (!myUserId) return;
+    setSubmitting(true);
+    const { error } = await supabase.from('reviews').insert({
+      work_order_id: order.id,
+      customer_id:   myUserId,
+      shop_id:       order.shop_id,
+      rating,
+      comment: comment.trim() || null,
+    });
+    if (!error) {
+      setSubmitted(true);
+      onReviewSubmitted(order.id);
+    } else {
+      Alert.alert('Hata', 'Değerlendirme kaydedilemedi.');
+    }
+    setSubmitting(false);
+  }
 
   return (
     <>
@@ -314,6 +356,48 @@ function DetailSheet({ order, onClose }: { order: WorkOrder; onClose: () => void
           </View>
         )}
 
+        {/* Değerlendirme */}
+        {order.status === 'delivered' && (
+          submitted ? (
+            <View style={d.reviewDone}>
+              <CheckCircle size={18} color={C.success} weight="fill" />
+              <Text style={d.reviewDoneText}>Değerlendirdiniz — teşekkürler!</Text>
+            </View>
+          ) : (
+            <View style={d.section}>
+              <Text style={d.sectionTitle}>Tamirciyi Değerlendir</Text>
+              <View style={d.starRow}>
+                {[1, 2, 3, 4, 5].map(i => (
+                  <TouchableOpacity key={i} onPress={() => setRating(i)} hitSlop={8}>
+                    <Star size={32} color="#F59E0B" weight={i <= rating ? 'fill' : 'regular'} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TextInput
+                style={d.reviewInput}
+                value={comment}
+                onChangeText={setComment}
+                placeholder="Yorum (opsiyonel)..."
+                placeholderTextColor={C.muted}
+                multiline
+                numberOfLines={2}
+                textAlignVertical="top"
+              />
+              <TouchableOpacity
+                style={[d.reviewBtn, submitting && { opacity: 0.6 }]}
+                onPress={submitReview}
+                disabled={submitting}
+                activeOpacity={0.85}
+              >
+                {submitting
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={d.reviewBtnText}>Gönder</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          )
+        )}
+
         <View style={{ height: 32 }} />
       </ScrollView>
     </>
@@ -370,4 +454,11 @@ const d = StyleSheet.create({
   updateNote:   { fontSize: 12, color: C.muted },
   updatePhoto:  { width: '100%', height: 140, borderRadius: 8 },
   updateTime:   { fontSize: 11, color: C.muted },
+  // Review
+  reviewDone:   { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 14, backgroundColor: C.successBg, borderRadius: 12 },
+  reviewDoneText: { fontSize: 13, color: C.success, fontWeight: '600' },
+  starRow:      { flexDirection: 'row', gap: 8, paddingVertical: 4 },
+  reviewInput:  { backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: 10, padding: 12, fontSize: 14, color: C.text, minHeight: 64 },
+  reviewBtn:    { backgroundColor: C.primary, borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
+  reviewBtnText:{ color: '#fff', fontWeight: '700', fontSize: 15 },
 });
