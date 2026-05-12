@@ -47,11 +47,12 @@ export const REPAIR_CATEGORIES = [
 export type RepairCategoryId = typeof REPAIR_CATEGORIES[number]['id'];
 
 export const WORK_ORDER_STATUSES = {
-  received:    { label: 'Alındı',       color: '#9CA3AF' },
-  inspecting:  { label: 'İnceleniyor',  color: '#F59E0B' },
-  in_progress: { label: 'Onarımda',     color: '#3B82F6' },
+  received:    { label: 'Bekliyor',     color: '#F59E0B' },
+  inspecting:  { label: 'İnceleniyor',  color: '#3B82F6' },
+  in_progress: { label: 'Onarımda',     color: '#8B5CF6' },
   ready:       { label: 'Hazır',        color: '#10B981' },
   delivered:   { label: 'Teslim edildi', color: '#6B7280' },
+  cancelled:   { label: 'İptal edildi', color: '#EF4444' },
 } as const;
 
 export type WorkOrderStatus = keyof typeof WORK_ORDER_STATUSES;

@@ -28,6 +28,7 @@ type WorkOrder = {
 };
 
 const STATUS_FLOW: WorkOrderStatus[] = ['received', 'inspecting', 'in_progress', 'ready', 'delivered'];
+const CANCELLED: WorkOrderStatus = 'cancelled';
 const DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
 function timeAgo(iso: string) {
@@ -46,6 +47,15 @@ function fmtDate(iso: string) {
 
 // ─── Durum Timeline ───────────────────────────────────────────────────────────
 function StatusTimeline({ current }: { current: WorkOrderStatus }) {
+  if (current === CANCELLED) {
+    return (
+      <View style={[tl.wrap, { backgroundColor: '#FEF2F2', borderRadius: 10, padding: 10 }]}>
+        <Text style={{ color: C.danger, fontWeight: '700', fontSize: 13 }}>
+          ✕ İş emri tamirci tarafından reddedildi
+        </Text>
+      </View>
+    );
+  }
   const idx = STATUS_FLOW.indexOf(current);
   return (
     <View style={tl.wrap}>
