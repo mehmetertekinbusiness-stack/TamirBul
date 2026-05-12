@@ -1,6 +1,6 @@
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  Modal, ScrollView, RefreshControl, ActivityIndicator, Linking,
+  Modal, ScrollView, RefreshControl, ActivityIndicator, Linking, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useCallback } from 'react';
@@ -15,7 +15,7 @@ import { C, WORK_ORDER_STATUSES, REPAIR_CATEGORIES } from '../../lib/constants';
 type WorkOrderStatus = keyof typeof WORK_ORDER_STATUSES;
 
 type Update = {
-  id: string; status: string; note: string | null; created_at: string;
+  id: string; status: string; note: string | null; photo_url: string | null; created_at: string;
 };
 
 type WorkOrder = {
@@ -109,7 +109,7 @@ export default function WorkOrdersScreen() {
 
     const { data } = await supabase
       .from('work_orders')
-      .select('id, status, category, description, mechanic_note, created_at, updated_at, repair_shops(name,phone), vehicles(plate,brand,model), work_order_updates(id,status,note,created_at)')
+      .select('id, status, category, description, mechanic_note, created_at, updated_at, repair_shops(name,phone), vehicles(plate,brand,model), work_order_updates(id,status,note,photo_url,created_at)')
       .eq('customer_id', me.id)
       .order('created_at', { ascending: false });
 
@@ -298,9 +298,12 @@ function DetailSheet({ order, onClose }: { order: WorkOrder; onClose: () => void
               return (
                 <View key={u.id} style={d.updateRow}>
                   <View style={[d.updateDot, { backgroundColor: uInfo?.color ?? C.muted }]} />
-                  <View style={{ flex: 1 }}>
+                  <View style={{ flex: 1, gap: 4 }}>
                     <Text style={d.updateStatus}>{uInfo?.label ?? u.status}</Text>
-                    {u.note && <Text style={d.updateNote}>{u.note}</Text>}
+                    {u.note ? <Text style={d.updateNote}>{u.note}</Text> : null}
+                    {u.photo_url ? (
+                      <Image source={{ uri: u.photo_url }} style={d.updatePhoto} resizeMode="cover" />
+                    ) : null}
                   </View>
                   <Text style={d.updateTime}>
                     {new Date(u.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
@@ -364,6 +367,7 @@ const d = StyleSheet.create({
   updateRow:    { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   updateDot:    { width: 10, height: 10, borderRadius: 5, marginTop: 3 },
   updateStatus: { fontSize: 13, fontWeight: '600', color: C.text },
-  updateNote:   { fontSize: 12, color: C.muted, marginTop: 2 },
+  updateNote:   { fontSize: 12, color: C.muted },
+  updatePhoto:  { width: '100%', height: 140, borderRadius: 8 },
   updateTime:   { fontSize: 11, color: C.muted },
 });
