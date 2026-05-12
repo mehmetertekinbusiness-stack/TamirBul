@@ -15,6 +15,53 @@
 
 ---
 
+### [2026-05-12] Checkpoint — Tamirci Kabul/Red + Push Notification + Migration'lar
+
+**Tamamlanan:**
+- **Supabase CLI login** — yeni cihazda `supabase link` tamamlandı, `config.toml` major_version 15→17 güncellendi
+- **Migration 004** (security_fixes) uygulandı:
+  - `wou_mechanic_insert` RLS: iş emri sahipliği doğrulaması eklendi
+  - `shop_categories` ALL → INSERT + DELETE (explicit ayrım)
+  - `suppliers` ALL → SELECT + INSERT + UPDATE + DELETE (explicit ayrım)
+- **Migration 005** (schema_fixes) uygulandı:
+  - `repair_shops`'a `district`, `avg_rating`, `review_count` kolonları eklendi
+  - `reviews` INSERT/UPDATE/DELETE → `update_shop_rating()` trigger oluşturuldu
+- **Migration 006** (status_extend) uygulandı — transaction dışı (`--no-tx`):
+  - `work_order_status_enum`'a `cancelled` değeri eklendi
+- **Migration 007** (push_webhook) uygulandı:
+  - `work_orders.status` UPDATE → `notify_work_order_status_change()` trigger
+  - `pg_net` olmadan graceful NOTICE ile pas geçiyor
+- **Edge Function** `notify-status-change` deploy edildi (Expo Push API entegrasyonu)
+- **`(mechanic)/work-orders.tsx`** tamamen yeniden yazıldı:
+  - `received` durumundaki iş emirleri için **Kabul Et** / **Reddet** butonları
+  - Kabul → status: `inspecting` + `work_order_updates` kaydı
+  - Reddet → Alert onayı → status: `cancelled` + listeden kaldır
+  - Header'da bekleyen iş emri rozeti (`X yeni`)
+- **`(customer)/work-orders.tsx`**: `cancelled` için kırmızı uyarı kartı eklendi (timeline yerine)
+- **`lib/constants.tsx`**: `cancelled` durumu eklendi, `received` etiketi → "Bekliyor"
+
+**Kararlar:**
+- Migration CLI tracking uyumsuz (dosya adı formatı farklı) → Management API ile direkt SQL çalıştırma yöntemi kalıcı çözüm
+- Push notification için pg_net yerine Supabase Webhooks yöntemi tercih edilecek (Dashboard'dan manuel eklenecek)
+- Supabase Management token: `sbp_e5754c42...` (CLI login ile ~/.supabase/access-token'da saklanıyor)
+
+**Sorunlar / Çözümler:**
+| # | Sorun | Çözüm | Durum |
+|---|-------|-------|-------|
+| T-08 | `sb_secret_` format token → Management API 401 | CLI login (`supabase login`) → `sbp_` token otomatik alındı | ✅ AŞILDI |
+| T-09 | `supabase db push` → migration 001 zaten var, `42710` hata | Migration CLI tracking bypass — `supabase db query` ve Management API direkt SQL | ✅ AŞILDI |
+| T-10 | Migration 006 `ALTER TYPE ADD VALUE` transaction içinde çalışmıyor | `--no-tx` flag ile transaction sarmalı olmadan uygulandı | ✅ AŞILDI |
+| T-11 | `shop/[id].tsx` `district` ve `avg_rating` DB'de yoktu | Migration 005 ile kolonlar eklendi, rating trigger kuruldu | ✅ AŞILDI |
+
+**Bekleyen:**
+- Push notification tam akışı için: Supabase Dashboard → Database → Webhooks → `notify-status-change` URL ekle
+- Edge Function env: `SUPABASE_SERVICE_ROLE_KEY` Dashboard → Functions → notify-status-change → Secrets'a ekle
+- EAS build ile cihazda uçtan uca test
+- ESLint config (`eslint.config.js`) — backlog
+- Push to remote (`git push`)
+
+---
+
 ### [2026-05-11] Yeni Cihaz Kurulumu + Skill Audit Oturumu
 
 **Tamamlanan:**
