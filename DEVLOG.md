@@ -15,6 +15,48 @@
 
 ---
 
+### [2026-05-12] Checkpoint 19:30 — ESLint Temizliği + DVI Fotoğraf + Değerlendirme + EAS Build
+
+**Tamamlanan:**
+- **ESLint konfigürasyonu** (`eslint.config.js`) tamamlandı — 0 hata, 0 uyarı
+  - Kullanılmayan importlar kaldırıldı (Image, Clock, CheckCircle, WORK_ORDER_STATUSES)
+  - JSX unescaped entity düzeltmeleri (`&apos;`)
+  - `react-hooks/exhaustive-deps` kasıtlı noktalarda eslint-disable ile susturuldu
+  - `import/first` ihlali — Colors import `lib/constants.tsx` başına taşındı
+- **Node 20 kurulumu** (nvm) — `toReversed()` uyumsuzluğu (Node 18 → 20) çözüldü
+- **Migration 008** uygulandı: `work-order-photos` bucket public yapıldı + `wo_photos_upload` policy eklendi
+- **İş emrine fotoğraf desteği (DVI temel):**
+  - `(mechanic)/work-order/[id].tsx`: galeri picker (`expo-image-picker`) + Supabase Storage upload
+  - Fotoğraf durum güncellemesiyle birlikte `work_order_updates.photo_url`'e kaydediliyor
+  - `(customer)/work-orders.tsx`: güncelleme geçmişinde fotoğraf thumbnail gösterimi
+- **Müşteri değerlendirmesi:**
+  - Teslim edilen iş emirlerinde `DetailSheet`'e 5 yıldız + yorum formu eklendi
+  - `reviews` tablosuna INSERT (work_order_id, customer_id, shop_id, rating, comment)
+  - `update_shop_rating()` trigger otomatik avg_rating / review_count güncelliyor
+  - Duplicate önleme: `work_order_id` üzerinden kontrol, gönderi sonrası form kaybolur
+- **EAS Build** tamamlandı ✓ — APK hazır:
+  - Build ID: `7e288d39-6828-4898-ac4b-fb90612bc896`
+  - Node 20 ile başarılı; Node 18'de `toReversed` hatası veriyordu
+
+**Kararlar:**
+- `work-order-photos` bucket public yapıldı (storage signed URL yerine direkt URL — MVP için yeterli)
+- `reviews.work_order_id` FK sayesinde her iş emri için tek değerlendirme garanti (DB constraint)
+- EAS CLI Node versiyonu: `/usr/local/bin/eas` (`.local/bin` değil), Node 20 gerekli
+
+**Sorunlar / Çözümler:**
+| # | Sorun | Çözüm | Durum |
+|---|-------|-------|-------|
+| T-12 | EAS build — `configs.toReversed is not a function` (Node 18) | nvm + Node 20 kuruldu, EAS bu sürümle çalıştırıldı | ✅ AŞILDI |
+| T-13 | `@typescript-eslint/no-unused-vars` `_`-prefixed değişkenleri uyarı verdi | `eslint-config-expo/flat` içindeki TS plugin konfigüre edilemez — değişkenler doğrudan kaldırıldı | ✅ AŞILDI |
+
+**Bekleyen:**
+- EAS build APK'sı cihazda kurulup uçtan uca test edilecek
+- Tamirci dashboard istatistikleri (aylık iş emri sayısı, kategori dağılımı)
+- Anlık mesaj / onay akışı (müşteriye fotoğraf + "Kabul et / Reddet" butonu)
+- Test altyapısı (Jest + React Native Testing Library) — backlog
+
+---
+
 ### [2026-05-12] Checkpoint — Tamirci Kabul/Red + Push Notification + Migration'lar
 
 **Tamamlanan:**
