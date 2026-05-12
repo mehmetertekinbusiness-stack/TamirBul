@@ -8,11 +8,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   CaretLeft, Star, MapPin, Phone, CheckCircle,
-  Wrench, Car, X, ArrowRight, Clock,
+  Wrench, Car, X, ArrowRight,
 } from 'phosphor-react-native';
 import { useAuth } from '@clerk/clerk-expo';
 import { supabase } from '../../supabase';
-import { C, REPAIR_CATEGORIES, WORK_ORDER_STATUSES } from '../../lib/constants';
+import { C, REPAIR_CATEGORIES } from '../../lib/constants';
 
 // ─── Tipler ───────────────────────────────────────────────────────────────────
 type Shop = {

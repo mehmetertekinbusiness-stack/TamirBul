@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { Colors } from '../constants/theme';
 
 const _extra = (Constants.expoConfig?.extra ?? {}) as Record<string, string>;
 
@@ -13,9 +14,6 @@ export const BANNER_ID = __DEV__
   : 'ca-app-pub-PLACEHOLDER/PLACEHOLDER';
 
 // ─── Tasarım Renkleri (constants/theme.ts → Colors kaynağı) ──────────────────
-// Ekranlar C.primary gibi kısa alias kullanıyor — kaynak tek, Colors.
-import { Colors } from '../constants/theme';
-
 export const C = {
   primary:    Colors.primary,
   secondary:  Colors.secondary,

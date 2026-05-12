@@ -273,7 +273,7 @@ export default function OnboardingScreen() {
 
 // ─── Yardımcı Field bileşeni ─────────────────────────────────────────────────
 function Field({ label, value, onChange, placeholder, keyboard, autoCapitalize, maxLen }: {
-  label: string; value: string; onChange: (v: string) => void;
+  label: string; value: string; onChange: (_v: string) => void;
   placeholder?: string; keyboard?: any; autoCapitalize?: any; maxLen?: number;
 }) {
   return (

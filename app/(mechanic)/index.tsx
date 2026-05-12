@@ -2,7 +2,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
-import { ClipboardText, Clock, CheckCircle, Car, Wrench } from 'phosphor-react-native';
+import { ClipboardText, Clock, Car, Wrench } from 'phosphor-react-native';
 import { useAuth } from '@clerk/clerk-expo';
 import { supabase } from '../../supabase';
 import { C, WORK_ORDER_STATUSES, REPAIR_CATEGORIES } from '../../lib/constants';

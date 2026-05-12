@@ -175,7 +175,7 @@ export default function SignUpScreen() {
 
           <View style={s.header}>
             <Text style={s.title}>Hesap Oluştur</Text>
-            <Text style={s.subtitle}>TamirBul'a ücretsiz katılın</Text>
+            <Text style={s.subtitle}>TamirBul&apos;a ücretsiz katılın</Text>
           </View>
 
           <Text style={s.sectionLabel}>Hesap türünü seçin</Text>

@@ -172,7 +172,7 @@ export default function SuppliersScreen() {
 }
 
 function MField({ label, value, onChange, placeholder, keyboard }: {
-  label: string; value: string; onChange: (v: string) => void;
+  label: string; value: string; onChange: (_v: string) => void;
   placeholder?: string; keyboard?: any;
 }) {
   return (

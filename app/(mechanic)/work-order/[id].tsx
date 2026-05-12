@@ -34,7 +34,7 @@ export default function WorkOrderDetail() {
 
   useEffect(() => {
     loadOrder();
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadOrder() {
     setLoading(true);

@@ -1,6 +1,6 @@
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  StatusBar, SafeAreaView, Image,
+  StatusBar, SafeAreaView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { C } from '../../lib/constants';

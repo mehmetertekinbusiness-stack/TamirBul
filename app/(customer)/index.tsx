@@ -91,7 +91,7 @@ const ShopCard = memo(function ShopCard({ item, onPress }: { item: Shop; onPress
 // ─── Customer Home ────────────────────────────────────────────────────────────
 export default function CustomerHome() {
   const router = useRouter();
-  const { userId } = useSession();
+  useSession();
 
   const [shops,      setShops]      = useState<Shop[]>([]);
   const [loading,    setLoading]    = useState(true);

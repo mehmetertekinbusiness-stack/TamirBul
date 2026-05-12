@@ -148,7 +148,7 @@ function AppLayout() {
 
     onAuthChange();
     return () => { mounted = false; };
-  }, [isSignedIn, clerkUserId]);
+  }, [isSignedIn, clerkUserId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <ErrorBoundary>

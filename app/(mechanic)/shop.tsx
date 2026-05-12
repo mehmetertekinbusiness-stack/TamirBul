@@ -31,7 +31,7 @@ export default function ShopScreen() {
 
   useEffect(() => {
     loadShop();
-  }, [clerkUserId]);
+  }, [clerkUserId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadShop() {
     if (!clerkUserId) return;
@@ -103,7 +103,7 @@ export default function ShopScreen() {
         <View style={s.centered}>
           <Storefront size={48} color={C.border} weight="thin" />
           <Text style={s.emptyTitle}>Dükkan bulunamadı</Text>
-          <Text style={s.emptyBody}>Onboarding'i tamamlayarak dükkanınızı oluşturun.</Text>
+          <Text style={s.emptyBody}>Onboarding&apos;i tamamlayarak dükkanınızı oluşturun.</Text>
         </View>
       </SafeAreaView>
     );
@@ -161,7 +161,7 @@ export default function ShopScreen() {
 }
 
 function Field({ label, value, onChange, placeholder, keyboard, multiline }: {
-  label: string; value: string; onChange: (v: string) => void;
+  label: string; value: string; onChange: (_v: string) => void;
   placeholder?: string; keyboard?: any; multiline?: boolean;
 }) {
   return (

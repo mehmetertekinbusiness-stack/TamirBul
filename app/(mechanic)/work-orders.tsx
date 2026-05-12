@@ -43,7 +43,6 @@ export default function WorkOrdersScreen() {
   const [orders,    setOrders]    = useState<WorkOrder[]>([]);
   const [loading,   setLoading]   = useState(true);
   const [filter,    setFilter]    = useState<WorkOrderStatus | 'all'>('all');
-  const [shopId,    setShopId]    = useState<string | null>(null);
   const [myUserId,  setMyUserId]  = useState<string | null>(null);
   const [acting,    setActing]    = useState<string | null>(null); // iş emri ID
 
@@ -57,7 +56,6 @@ export default function WorkOrdersScreen() {
     const { data: shop } = await supabase
       .from('repair_shops').select('id').eq('owner_id', user.id).maybeSingle();
     if (!shop) return;
-    setShopId(shop.id);
 
     const { data } = await supabase
       .from('work_orders')
